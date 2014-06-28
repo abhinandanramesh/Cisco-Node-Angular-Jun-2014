@@ -1,0 +1,24 @@
+extends ../layout
+block scripts
+  link(rel="stylesheet", href="/stylesheets/tasks.css")
+  script(type='text/javascript', src='/javascripts/tasks.js')
+block content
+  h1 Task Manager (#{tasks.length})
+  hr
+  form(method="post", action="/tasks")
+    span Task :
+    input(type="text",name="taskName")
+    input(type="submit",value="Add Task", name="btnOperation")
+    input(type="submit",value="Remove Completed", name="btnOperation")
+  ul
+    each task in tasks
+      if task.isCompleted
+        li
+          span(class="completed") #{task.name}
+          a(href="/tasks/toggle?id=#{task.id}") Toggle
+      else
+        li
+          span #{task.name}
+          a(href="/tasks/toggle?id=#{task.id}") Toggle
+  div #{message}
+

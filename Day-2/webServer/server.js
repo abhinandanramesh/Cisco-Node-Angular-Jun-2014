@@ -14,14 +14,31 @@ function requestListener(req,res){
 			number2 : 0,
 			result : 0
 		};
-	
-		if (urlObj.query){
-			var qsObj = qs.parse(urlObj.query);
-			resultObj.number1 = parseInt(qsObj.number1,10);
-			resultObj.number2 = parseInt(qsObj.number2,10);
-			resultObj.result = resultObj.number1 + resultObj.number2;
+		
+		if (req.method === "POST"){
+			var reqData = '';
+			req.on("data",function(data){
+				reqData += data;
+			});
+			req.on("end",function(){
+				var qsObj = qs.parse(reqData);
+				resultObj.number1 = parseInt(qsObj.number1,10);
+				resultObj.number2 = parseInt(qsObj.number2,10);
+				resultObj.result = resultObj.number1 + resultObj.number2;	
+				serveFile(filePath,resultObj,res);
+			});
+		} else {
+			serveFile(filePath,resultObj,res);
 		}
-		fs.readFile(filePath,{encoding : "utf8"}, function(err,fileContents){
+
+	} else {
+		res.statusCode = 404;
+		res.end();
+	}
+
+}
+function serveFile(filePath,resultObj,res){
+	fs.readFile(filePath,{encoding : "utf8"}, function(err,fileContents){
 			if (!err){
 				res.end(fileContents.replace("{number1}",resultObj.number1).replace("{number2}", resultObj.number2).replace("{result}", resultObj.result));
 			} else {
@@ -30,11 +47,6 @@ function requestListener(req,res){
 			}
 			
 		});
-	} else {
-		res.statusCode = 404;
-		res.end();
-	}
-
 }
 var server = http.createServer(requestListener);
 server.listen(8080);
