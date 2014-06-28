@@ -1,0 +1,16 @@
+{
+  "name": "calculatorApp",
+  "version": "0.1.0",
+  "description": "A sample application to demonstrate the modularity concepts in node",
+  "main": "calculatorClient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "test",
+    "node",
+    "calculator"
+  ],
+  "author": "Magesh K",
+  "license": "BSD-2-Clause"
+}
