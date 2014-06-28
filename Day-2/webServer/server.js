@@ -9,10 +9,26 @@ function requestListener(req,res){
 	var filePath = (path.join(__dirname, urlObj.pathname));
 
 	if (fs.existsSync(filePath)){
-		console.log(qs.parse(urlObj.query));
-		fs.readFile(filePath,{encoding : "utf8"}, function(err,data){
-			res.write(data);
-			res.end();
+		var resultObj = {
+			number1 : 0,
+			number2 : 0,
+			result : 0
+		};
+	
+		if (urlObj.query){
+			var qsObj = qs.parse(urlObj.query);
+			resultObj.number1 = parseInt(qsObj.number1,10);
+			resultObj.number2 = parseInt(qsObj.number2,10);
+			resultObj.result = resultObj.number1 + resultObj.number2;
+		}
+		fs.readFile(filePath,{encoding : "utf8"}, function(err,fileContents){
+			if (!err){
+				res.end(fileContents.replace("{number1}",resultObj.number1).replace("{number2}", resultObj.number2).replace("{result}", resultObj.result));
+			} else {
+				res.statusCode = 500;
+				res.end();	
+			}
+			
 		});
 	} else {
 		res.statusCode = 404;

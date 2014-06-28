@@ -3,15 +3,21 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Calculator</title>
+	<style>
+	.result{
+		font-size: 28pt;
+	}
+	</style>
 </head>
 <body>
 	<form  method="get">
 		<span>Number1 :</span>
-		<input type="text" name="number1" id="txtNumber1">
+		<input type="text" name="number1" id="txtNumber1" value="{number1}">
 		<span>Number2 :</span>
-		<input type="text" name="number2" id="txtNumber2">
+		<input type="text" name="number2" id="txtNumber2" value="{number2}">
 		<input type="submit" value="Add" name="operation">
 		<input type="submit" value="Subtract" name="operation">
+		<div class="result">{result}</div>
 	</form>
 </body>
 </html>
