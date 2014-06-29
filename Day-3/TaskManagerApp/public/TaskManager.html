@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Task Manager</title>
+	<style>
+	li{
+		
+		cursor: pointer;
+	}
+	.completed {
+		color : red;
+		text-decoration: line-through;
+		font-style: italic;
+	}
+	</style>
+	<script type="text/javascript" src="/javascripts/angular.js"></script>
+	<script>
+	angular
+		.module('taskApp',[])
+		.factory('Task',function(){
+			function Task(name,isCompleted){
+				this.name = name;
+				this.isCompleted = isCompleted;
+			};
+			Task.prototype.toggleCompletion = function(){
+				this.isCompleted = !this.isCompleted;
+			};
+			return Task;	
+		})
+		.factory('taskService', function($http,Task, $q){
+			return {
+				getAllTasks : function(){
+					var deferred = $q.defer();
+					var promise = $http({method : 'get', url : '/tasks'});
+					promise.success(function(data){
+						var list = data.map(function(obj){ 
+							return new Task(obj.name, obj.isCompleted)
+						});
+						deferred.resolve(list);
+					});
+					promise.error(function(){
+						deferred.reject("error retrieving data..");
+					})
+					return deferred.promise;
+				}
+			};
+		})
+		.controller('taskController',function taskController($scope,Task,taskService){
+			var list = [];
+			taskService.getAllTasks().then(function(data){
+				list = data;
+			}).catch(function(err){
+				console.log(err);
+			});
+			
+			$scope.tasks = {
+				getAll : function(){
+					return list;
+				},
+				addNew : function(task){
+					var newTask = new Task(task,false);
+					list.push(newTask);
+				}
+			}
+		})
+		.filter('limitName', function(){
+			return function(taskName, nameLength){
+				taskName = taskName || "";
+				return taskName.length > nameLength ? taskName.substr(0,nameLength - 3) + "..." : taskName;
+			}
+		}) 	
+		.filter('limitBySize', function(){
+			return function(tasks){
+				return tasks.filter(function(t){
+					return t.name.length > 20;
+				});
+			}
+		});
+	</script>
+</head>
+<body ng-app="taskApp" >
+	<h1>Task Manager</h1>
+	<span>Search :</span><input type="text" data-ng-model="searchTask.name"> 
+	<span>Task Name Length</span>
+	<select data-ng-model="nameLength">
+		<option value="10" selected>10</option>
+		<option value="20">20</option>
+		<option value="30">30</option>
+	</select>
+	<hr>
+	<div class="content" data-ng-controller="taskController" >
+		<span>Task :</span>
+		<input type="text" data-ng-model="newTask">
+		<input type="button" value="Add Task" data-ng-click="tasks.addNew(newTask)">
+		<input type="button" value="Remove Completed" data-ng-click="tasks.removeCompleted()">
+		<ul>
+			<li 
+				data-ng-repeat="task in tasks.getAll() | filter:searchTask" 
+				data-ng-click="task.toggleCompletion()"
+				data-ng-class="{completed : task.isCompleted}"
+				>{{task.name |  uppercase | limitName:nameLength}}</li>
+		</ul>
+	</div>
+</body>
+</html>
