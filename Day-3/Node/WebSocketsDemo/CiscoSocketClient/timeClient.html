@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Time Client</title>
+	<script type="text/javascript">
+	(function(){
+		window.addEventListener("DOMContentLoaded",function(){
+			var ws = new WebSocket("ws://localhost:9090");
+			ws.addEventListener("message",function(msgEvt){
+				document.getElementById("divMessages").innerHTML += msgEvt.data + "<br/>";
+			});
+			document.getElementById("btnStart").addEventListener("click",function(){
+				ws.send("time")
+			});
+			document.getElementById("btnStop").addEventListener("click",function(){
+				ws.send("stop");
+			});
+		})
+	})();
+	</script>
+</head>
+<body>
+	<input type="button" value="Start" id="btnStart">
+	<input type="button" value="Stop" id="btnStop">
+	<div id="divMessages"></div>
+</body>
+</html>
