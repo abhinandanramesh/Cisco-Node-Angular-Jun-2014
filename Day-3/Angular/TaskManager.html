@@ -24,13 +24,17 @@
 				this.isCompleted = isCompleted;
 			};
 			Task.prototype.toggleCompletion = function(){
-				console.log("toggle Completion");
 				this.isCompleted = !this.isCompleted;
 			};
 			return Task;	
 		})
-		.controller('taskController',function taskController($scope, Task){
+		.controller('taskController',function taskController($scope,Task,$http){
 			var list = [];
+			var promise = $http({method : 'get', url : '/tasks'});
+			promise.success(function(data){
+				console.log(data);
+				list = data;
+			});
 			$scope.tasks = {
 				getAll : function(){
 					return list;
@@ -40,23 +44,43 @@
 					list.push(newTask);
 				}
 			}
+		})
+		.filter('limitName', function(){
+			return function(taskName, nameLength){
+				taskName = taskName || "";
+				return taskName.length > nameLength ? taskName.substr(0,nameLength - 3) + "..." : taskName;
+			}
+		})
+		.filter('limitBySize', function(){
+			return function(tasks){
+				return tasks.filter(function(t){
+					return t.name.length > 20;
+				});
+			}
 		});
 	</script>
 </head>
-<body ng-app="taskApp">
+<body ng-app="taskApp" >
 	<h1>Task Manager</h1>
+	<span>Search :</span><input type="text" data-ng-model="searchTask.name"> 
+	<span>Task Name Length</span>
+	<select data-ng-model="nameLength">
+		<option value="10" selected>10</option>
+		<option value="20">20</option>
+		<option value="30">30</option>
+	</select>
 	<hr>
-	<div class="content" data-ng-controller="taskController">
+	<div class="content" data-ng-controller="taskController" >
 		<span>Task :</span>
 		<input type="text" data-ng-model="newTask">
 		<input type="button" value="Add Task" data-ng-click="tasks.addNew(newTask)">
 		<input type="button" value="Remove Completed" data-ng-click="tasks.removeCompleted()">
 		<ul>
 			<li 
-				data-ng-repeat="task in tasks.getAll()" 
+				data-ng-repeat="task in tasks.getAll() | filter:searchTask" 
 				data-ng-click="task.toggleCompletion()"
 				data-ng-class="{completed : task.isCompleted}"
-				>{{task.name | uppercase}}</li>
+				>{{task.name}}</li>
 		</ul>
 	</div>
 </body>
